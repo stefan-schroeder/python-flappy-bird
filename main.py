@@ -19,10 +19,11 @@ startImg = pygame.image.load('images/start.png')
 
 #global variables
 fps = 60
-speed = 1
+speed = 2
 score = 0
 font = pygame.font.Font('freesansbold.ttf', 32)
 birdPos = (251,300)
+gamestate = 'start'
 #window
 win_width = 551
 win_height = 720
@@ -81,14 +82,16 @@ class Pipe(pygame.sprite.Sprite):
             self.kill()
         #score
         global score
-        if birdPos[0] > self.rect.topleft[0] and not self.passed:
-            self.enter = True
-        if birdPos[0] > self.rect.topright[0] and self.enter:
-            self.passed = True
-        if self.enter and self.passed and not self.exit:
-            self.exit = True
-            score += 1
-
+        if self.type == 'top':
+            
+            if birdPos[0] > self.rect.topleft[0] and not self.passed:
+                self.enter = True
+            if birdPos[0] > self.rect.topright[0] and self.enter:
+                self.passed = True
+            if self.enter and self.passed and not self.exit:
+                self.exit = True
+                score += 1
+                print(score)    
 
 #ground class
 class Ground(pygame.sprite.Sprite):
@@ -132,10 +135,23 @@ def main():
     pipe_clock = 0
     pipes = pygame.sprite.Group()
     
-    running = True
+    global gamestate
+    global score
+
+    #start screen
+    while gamestate == 'start':
+        clock.tick(fps)
+        ifQuit()
+        user_input = pygame.key.get_pressed()
+        screen.blit(backgroundImg,(0,0))
+        screen.blit(startImg,(win_width//2-100,win_height//2-100))
+        if user_input [pygame.K_SPACE]:
+            gamestate = 'play'
+        pygame.display.update()
+
     
     #once space key is hit, run game
-    while running:
+    while gamestate == 'play':
         clock.tick(fps)
         ifQuit()
         user_input = pygame.key.get_pressed()
@@ -156,9 +172,10 @@ def main():
         #check for collision/end game
         collision_pipes = pygame.sprite.spritecollide(bird.sprites()[0], pipes, False)
         collision_ground = pygame.sprite.spritecollide(bird.sprites()[0], grounds, False)
-        if collision_pipes or collision_ground or bird.sprites()[0].rect.y < 0:
+        if collision_pipes or collision_ground or bird.sprites()[0].rect.y < 0 or bird.sprites()[0].rect.y > 500:
+            gamestate = 'end'
             screen.blit(game_overImg,(win_width//2-100,win_height//2-100))
-            pygame.display.update()
+        
         #add ground
         if len(grounds) <= 2:
             #-23 to align lines
@@ -175,4 +192,17 @@ def main():
         pipe_clock -= 1
         #update screen
         pygame.display.update()
+    while gamestate == 'end':
+        clock.tick(fps)
+        ifQuit()
+        user_input = pygame.key.get_pressed()
+        screen.blit(backgroundImg,(0,0))
+        screen.blit(game_overImg,(win_width//2-100,win_height//2-100))
+        score_text = font.render(f'Score: {score}', True, (255,255,255))
+        screen.blit(score_text, (10,10))
+        pygame.display.update()
+        if user_input[pygame.K_r]:
+            gamestate = 'start'
+            main()
+            
 main()
