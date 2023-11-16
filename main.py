@@ -1,5 +1,9 @@
 import pygame
+import random
 from pygame.sprite import Sprite
+
+#initialize pygame
+pygame.init()
 
 #images
 bird_Imgs = [pygame.image.load('images/bird_up.png'),
@@ -15,14 +19,14 @@ startImg = pygame.image.load('images/start.png')
 
 #global variables
 fps = 60
-speed = 2 
-tube_gap = 70  # times 2 for total gap
+speed = 1
 score = 0
-high_score = 0
+font = pygame.font.Font('freesansbold.ttf', 32)
+birdPos = (251,300)
 #window
 win_width = 551
 win_height = 720
-birdPos = (251,300)
+screen = pygame.display.set_mode((win_width,win_height))
 
 #bird class
 
@@ -50,9 +54,9 @@ class Bird(pygame.sprite.Sprite):
         self.vel += 0.5
         if self.vel > 7:
             self.vel = 7
-        if self.rect.y < 720:
+        if self.rect.y < 500:
             self.rect.y += self.vel
-        if self.vel > -2:
+        if self.vel ==0:
             self.flap = False           
         
         if user_input[pygame.K_SPACE] and not self.flap:
@@ -81,10 +85,9 @@ class Pipe(pygame.sprite.Sprite):
             self.enter = True
         if birdPos[0] > self.rect.topright[0] and self.enter:
             self.passed = True
-        if self.enter and self.passed:
+        if self.enter and self.passed and not self.exit:
             self.exit = True
             score += 1
-            self.exit, self.enter, self.passed = False, False, False
 
 
 #ground class
@@ -113,31 +116,22 @@ def ifQuit():
 
 
 def main():
-
-    #initialize pygame
-    pygame.init()
-    screen = pygame.display.set_mode((win_width,win_height))
     pygame.display.set_caption("Flappy Bird!")
     clock = pygame.time.Clock()
     
     # initialize all
-    global speed
-    groundx = 0
-    groundy = 520
-    tube_gap = 70
-    
-    bird = pygame.sprite.GroupSingle()
-    bird.add(Bird())
-
-    pipes = pygame.sprite.Group()
-    pipes.add(Pipe(551,-570,top_pipeImg, "top"))
-    pipes.add(Pipe(551,370,bottom_pipeImg, "bottom"))
-    
+    # add to game
+    groundx, groundy = 0,520
     grounds = pygame.sprite.Group()
     grounds.add(Ground(groundx,groundy))
 
-    pygame.display.update()
-    speed = 2
+    #init bird
+    bird = pygame.sprite.GroupSingle()
+    bird.add(Bird())
+
+    pipe_clock = 0
+    pipes = pygame.sprite.Group()
+    
     running = True
     
     #once space key is hit, run game
@@ -151,17 +145,34 @@ def main():
         grounds.draw(screen)
         bird.draw(screen)
         pipes.draw(screen)
-        #update all
-        font = pygame.font.Font(None, 50)
+        #update sprites
+        pipes.update()
+        bird.update(user_input)
+        grounds.update()
+        #update score
         score_text = font.render(f'Score: {score}', True, (255,255,255))
-        screen.blit(score_text, (win_width//2 - 60, 50))
+        screen.blit(score_text, (10,10))
+        
+        #check for collision/end game
+        collision_pipes = pygame.sprite.spritecollide(bird.sprites()[0], pipes, False)
+        collision_ground = pygame.sprite.spritecollide(bird.sprites()[0], grounds, False)
+        if collision_pipes or collision_ground or bird.sprites()[0].rect.y < 0:
+            screen.blit(game_overImg,(win_width//2-100,win_height//2-100))
+            pygame.display.update()
         #add ground
         if len(grounds) <= 2:
             #-23 to align lines
             grounds.add(Ground(win_width-23,groundy))
-        for pipe in pipes:
-            if pipe.rect.x == 321:
-                pipes.add(Pipe(551,-570,top_pipeImg, "top"))
-                pipes.add(Pipe(551,370,bottom_pipeImg, "bottom"))
+
+        #add pipes
+        if pipe_clock <= 0 and bird.sprite.alive:
+            x_top, x_bottom = 550, 550
+            y_top = random.randint(-600, -480)
+            y_bottom = y_top + random.randint(90, 130) + bottom_pipeImg.get_height()
+            pipes.add(Pipe(x_top, y_top, top_pipeImg, 'top'))
+            pipes.add(Pipe(x_bottom, y_bottom, bottom_pipeImg, 'bottom'))
+            pipe_clock = random.randint(180, 250)
+        pipe_clock -= 1
+        #update screen
         pygame.display.update()
 main()
