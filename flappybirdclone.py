@@ -19,7 +19,7 @@ startImg = pygame.image.load('images/start.png')
 
 #global variables
 fps = 60
-speed = 2
+speed = 1
 score = 0
 font = pygame.font.Font('freesansbold.ttf', 32)
 birdPos = (251,300)
@@ -61,8 +61,8 @@ class Bird(pygame.sprite.Sprite):
             self.flap = False           
         
         if user_input[pygame.K_SPACE] and not self.flap:
-            self.vel = -7
-            self.flap = True       
+            self.vel = -8
+            self.flap = True
         
 
 
@@ -144,9 +144,12 @@ def main():
         ifQuit()
         user_input = pygame.key.get_pressed()
         screen.blit(backgroundImg,(0,0))
-        screen.blit(startImg,(win_width//2-100,win_height//2-100))
+        screen.blit(groundImg,(0,520))
+        screen.blit(bird_Imgs[0],(251,300))
+        screen.blit(startImg,(win_width//2-100,win_height//2-200))
         if user_input [pygame.K_SPACE]:
             gamestate = 'play'
+            screen.fill((0,0,0))
         pygame.display.update()
 
     
@@ -182,23 +185,25 @@ def main():
             grounds.add(Ground(win_width-23,groundy))
 
         #add pipes
-        if pipe_clock <= 0 and bird.sprite.alive:
+        if pipe_clock <= 0:
             x_top, x_bottom = 550, 550
-            y_top = random.randint(-600, -480)
-            y_bottom = y_top + random.randint(90, 130) + bottom_pipeImg.get_height()
+            y_top = random.randint(-620, -500)
+            y_bottom = y_top + random.randint(110, 150) + bottom_pipeImg.get_height()
             pipes.add(Pipe(x_top, y_top, top_pipeImg, 'top'))
             pipes.add(Pipe(x_bottom, y_bottom, bottom_pipeImg, 'bottom'))
             pipe_clock = random.randint(180, 250)
         pipe_clock -= 1
         #update screen
         pygame.display.update()
+
     while gamestate == 'end':
         clock.tick(fps)
         ifQuit()
         user_input = pygame.key.get_pressed()
-        screen.blit(backgroundImg,(0,0))
         screen.blit(game_overImg,(win_width//2-100,win_height//2-100))
-        score_text = font.render(f'Score: {score}', True, (255,255,255))
+        screen.blit(backgroundImg,(0,0))
+        screen.blit(groundImg,(0,520))
+        score_text = font.render(f'Your score: {score}', True, (255,255,255))
         screen.blit(score_text, (10,10))
         pygame.display.update()
         if user_input[pygame.K_r]:
