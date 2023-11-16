@@ -21,6 +21,7 @@ startImg = pygame.image.load('images/start.png')
 fps = 60
 speed = 1
 score = 0
+high_score = 0
 font = pygame.font.Font('freesansbold.ttf', 32)
 birdPos = (251,300)
 gamestate = 'start'
@@ -135,11 +136,16 @@ def main():
     pipe_clock = 0
     pipes = pygame.sprite.Group()
     
+    global speed
     global gamestate
     global score
+    global high_score
+    global win_height
+    global win_width
 
     #start screen
     while gamestate == 'start':
+        score = 0
         clock.tick(fps)
         ifQuit()
         user_input = pygame.key.get_pressed()
@@ -170,14 +176,20 @@ def main():
         grounds.update()
         #update score
         score_text = font.render(f'Score: {score}', True, (255,255,255))
+        high_score_text = font.render(f'High score: {high_score}', True, (255,255,255))
+
         screen.blit(score_text, (10,10))
+        screen.blit(high_score_text, (10,50))
+        
         
         #check for collision/end game
         collision_pipes = pygame.sprite.spritecollide(bird.sprites()[0], pipes, False)
         collision_ground = pygame.sprite.spritecollide(bird.sprites()[0], grounds, False)
         if collision_pipes or collision_ground or bird.sprites()[0].rect.y < 0 or bird.sprites()[0].rect.y > 500:
+            if score >= high_score:
+                high_score = score
             gamestate = 'end'
-            screen.blit(game_overImg,(win_width//2-100,win_height//2-100))
+
         
         #add ground
         if len(grounds) <= 2:
@@ -200,11 +212,16 @@ def main():
         clock.tick(fps)
         ifQuit()
         user_input = pygame.key.get_pressed()
-        screen.blit(game_overImg,(win_width//2-100,win_height//2-100))
         screen.blit(backgroundImg,(0,0))
         screen.blit(groundImg,(0,520))
+        bird.draw(screen)
+        grounds.draw(screen)
+        pipes.draw(screen)
+        screen.blit(game_overImg,(win_width//2-100,win_height//2-100))
         score_text = font.render(f'Your score: {score}', True, (255,255,255))
+        high_score_text = font.render(f'High score: {high_score}', True, (255,255,255))
         screen.blit(score_text, (10,10))
+        screen.blit(high_score_text, (10,50))
         pygame.display.update()
         if user_input[pygame.K_r]:
             gamestate = 'start'
