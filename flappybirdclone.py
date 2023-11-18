@@ -19,7 +19,7 @@ startImg = pygame.image.load('images/start.png')
 
 #global variables
 fps = 60
-speed = 1
+speed = 2
 score = 0
 high_score = 0
 font = pygame.font.Font('freesansbold.ttf', 32)
@@ -203,7 +203,7 @@ def main():
             y_bottom = y_top + random.randint(110, 150) + bottom_pipeImg.get_height()
             pipes.add(Pipe(x_top, y_top, top_pipeImg, 'top'))
             pipes.add(Pipe(x_bottom, y_bottom, bottom_pipeImg, 'bottom'))
-            pipe_clock = random.randint(180, 250)
+            pipe_clock = random.randint(80,120)
         pipe_clock -= 1
         #update screen
         pygame.display.update()
@@ -218,7 +218,7 @@ def main():
         grounds.draw(screen)
         pipes.draw(screen)
         screen.blit(game_overImg,(win_width//2-100,win_height//2-100))
-        score_text = font.render(f'Your score: {score}', True, (255,255,255))
+        score_text = font.render(f'Score: {score}', True, (255,255,255))
         high_score_text = font.render(f'High score: {high_score}', True, (255,255,255))
         screen.blit(score_text, (10,10))
         screen.blit(high_score_text, (10,50))
