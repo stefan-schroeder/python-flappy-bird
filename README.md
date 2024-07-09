@@ -1,1 +1,1 @@
-cool little python flappy bird clone I made
+flappy bird w pygame 
